@@ -1,11 +1,42 @@
 <!Doctype html>
-<html np-app="twitter-service">
+<html ng-app="twitter-service">
 	<head>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+		<script src="http://code.jquery.com/jquery.min.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
+		<script src="js/oauth.min.js"></script>
+		<script src="js/services.js"></script>
+		<script src="js/controllers.js"></script>
+		<script src="js/app.js"></script>
 	</head>
 
 	<body>
-		<div>
+		<div class="container">
+			<div class="col-md-12" ng-controller="MainCtrl"> 
+				<h3 class="pull-center" ng-if="!connectedTwitter">Чтобы пользоваться услугами сервиса, вам нужно авторизироваться, нажмите сдесь <a href="" class="btn btn-success" ng-click="authenticate()">Сдесь</a></h3>
+
+				<div ng-if="connectedTwitter" class="col-md-8 col-md-offset-2">
+					<h3>
+						Генерация коллажа
+					</h3>
+					<form>
+						<div class="form-group">
+							<label for="collage-height">Введите высоту коллажа:</label>
+							<input type="text" id="collage-height" class="form-control" />
+						</div>
+
+						<div class="form-group">
+							<label for="collage-height">Введите высоту коллажа:</label>
+							<input type="text" id="collage-height" class="form-control" />
+						</div>
+
+						<div class="form-group">
+							<button class="btn btn-success">Сгенерирывать</button>
+						</div>
+					</form>
+				</div>
+			</div>
 		</div>
 	</body>
 </html>
