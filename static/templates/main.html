@@ -1,0 +1,27 @@
+<div class="col-md-12" ng-controller="MainCtrl"> 
+	<div id="unauth-message">
+		<h3 ng-if="authStatus == 'unauth'" class="pull-center">Чтобы пользоваться услугами сервиса, вам нужно авторизироваться, нажмите сдесь <a href="/api/auth" class="btn btn-success">Сдесь</a></h3>
+	</div>
+	
+
+	<div ng-if="authStatus == 'auth'" class="col-md-8 col-md-offset-2" id="form-generate-collage">
+		<h3>
+			Генерация коллажа
+		</h3>	
+		<form>
+			<div class="form-group">
+				<label for="collage-height">Введите высоту коллажа:</label>
+				<input type="text" id="collage-height" ng-model="collage.height" class="form-control" />
+			</div>
+
+			<div class="form-group">
+				<label for="collage-height">Введите высоту коллажа:</label>
+				<input type="text" id="collage-height" ng-model="collage.width" class="form-control" />
+			</div>
+
+			<div class="form-group">
+				<button class="btn btn-success" ng-click="submit()">Сгенерирывать</button>
+			</div>
+		</form>
+	</div>
+</div>

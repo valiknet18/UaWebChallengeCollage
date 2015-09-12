@@ -1,38 +1,22 @@
 (function() {
 	angular
 		.module('service.services', [])
-		.factory('twitterService', ['$q', function ($q) {
-			var authorizationResult = false;
+		.factory('authService', ['$http', function ($http) {
+			
+		}])
+		.factory('getAuthStatus', ['$http', function ($http) {			
+			var responseData = {};
 
 			return {
-				initialize: function () {
-					OAuth.initialize('vMqpqRdAb7Qd1Yu_Aqzk1zTi2xo', {
-		                cache: true
-		            });
+				getStatus: function (callback) {
+					$http
+						.get('/api/verify_auth')
+						.then(function (response) {
+							responseData = response
 
-		            authorizationResult = OAuth.create("twitter");
-				},
-				isReady: function () {
-					return (authorizationResult);
-				},
-				connectTwitter: function () {
-					var deferred = $q.defer();
-
-					OAuth.popup('twitter', {
-						cache: true
-					}, function (error, result) {
-						if (!error) {
-							authorizationResult = result;
-                    		deferred.resolve();
-						}
-					});
-
-					return deferred.promise;
-				},
-				clearCache: function () {
-					OAuth.clearCache('twitter');
-					authorizationResult = false;
-				}
+							callback(response)
+						});	
+				}, 
 			}
 		}]);	
 })();
