@@ -18,35 +18,21 @@ func setProportions(width, height float64) Proportions {
 }
 
 func getWidthAndHeighPhoto(persentProportialsStatuses float64, defaultProportions Proportions, follower *Follower) {
-	//It's 100%
-
 	var coefficient = 1.0
 
 	if persentProportialsStatuses > 80.0 {
-		coefficient = 1.03
+		coefficient = 0.8
 	} else if persentProportialsStatuses > 60.0 {
-		coefficient = 1.20
+		coefficient = 0.6
 	} else if persentProportialsStatuses > 40.0 {
-		coefficient = 1.40
-	} else if persentProportialsStatuses > 20.0 {
-		coefficient = 2.35
-	} else if persentProportialsStatuses > 10.0 {
-		coefficient = 4.6
-	} else if persentProportialsStatuses > 5.0 {
-		coefficient = 7.5
-	} else if persentProportialsStatuses > 2.0 {
-		coefficient = 22.20
-	} else if persentProportialsStatuses > 1.0 {
-		coefficient = 38
-	} else if persentProportialsStatuses > 0.5 {
-		coefficient = 100
+		coefficient = 0.4
 	} else {
-		coefficient = 150
+		coefficient = 0.2
 	}
 
-	MaxWidthImage := ((defaultProportions.Width - 200) / 2) * 1
-	MaxHeightImage := ((defaultProportions.Height - 200) / 2) * 1
+	MaxWidthImage := (defaultProportions.Width / 100) * 60
+	MaxHeightImage := (defaultProportions.Height / 100) * 60
 
-	follower.Width = (MaxWidthImage / 100) * persentProportialsStatuses * coefficient
-	follower.Height = (MaxHeightImage / 100) * persentProportialsStatuses * coefficient
+	follower.Width = MaxWidthImage * coefficient
+	follower.Height = MaxHeightImage * coefficient
 }

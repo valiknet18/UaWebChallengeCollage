@@ -141,7 +141,7 @@ func FindAndInsertInSlice(follower *Follower, defaultProporsions Proportions, fo
 			flag = true
 
 			break
-		} else if ((value.Width + follower.Width) > defaultProporsions.Width) && ((value.MaxHeight + follower.Height) < value.Height) {
+		} else if ((value.Width + follower.Width) > defaultProporsions.Width) && ((value.MaxHeight + follower.Height) <= value.Height) {
 
 			follower.NewLine = true
 
