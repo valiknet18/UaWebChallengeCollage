@@ -1,0 +1,7 @@
+#collage-wrapper {
+	overflow: hidden;
+}
+
+#collage-wrapper .collage-area {
+	float: left
+}

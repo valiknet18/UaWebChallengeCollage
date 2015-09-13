@@ -37,7 +37,7 @@ func main() {
 	r.GET("/", IndexAction)
 	r.GET("/api/auth", RedirectUserToTwitter)
 	r.GET("/api/maketoken", GetTwitterToken)
-	r.GET("/api/followers", GetFollowersAction)
+	r.GET("/api/collage", GenerateCollageAction)
 	r.GET("/api/verify_auth", VerifyAuthAction)
 
 	r.ServeFiles("/static/*filepath", http.Dir("static/"))
@@ -86,17 +86,19 @@ func VerifyAuthAction(rw http.ResponseWriter, req *http.Request, _ httprouter.Pa
 	}
 }
 
-func GetFollowersAction(rw http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	response, err := client.Get("https://api.twitter.com/1.1/followers/list.json?cursor=-1&screen_name=v1per16&skip_status=true&include_user_entities=false")
+func GenerateCollageAction(rw http.ResponseWriter, req *http.Request, params httprouter.Params) {
+	query := req.URL.Query()
+
+	followers := GetFollowersAction(query["name"][0])
+
+	result, err := json.Marshal(followers)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error parse")
 	}
 
-	defer response.Body.Close()
-
-	bits, err := ioutil.ReadAll(response.Body)
-	fmt.Fprintf(rw, "The newest item in your home timeline is: "+string(bits))
+	rw.Header().Set("Content-type", "application/json")
+	rw.Write(result)
 }
 
 //This return auth user
@@ -136,9 +138,3 @@ func GetTwitterToken(w http.ResponseWriter, r *http.Request, _ httprouter.Params
 
 	http.Redirect(w, r, "http://localhost:8000/#/", http.StatusTemporaryRedirect)
 }
-
-/**
-- width = 400
-- height = 300
-- count = 50
-*/

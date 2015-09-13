@@ -18,5 +18,15 @@
 						});	
 				}, 
 			}
+		}])
+		.factory('getCollage', ['$http', function ($http) {
+			return function (params, callback) {
+				console.log(params)
+
+				$http
+					.get('/api/collage?name=' + params.name + "&width=" + params.width + "&height=" + params.height)
+					.then(callback)
+				;
+			} 
 		}]);	
 })();
