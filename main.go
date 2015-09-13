@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 var (
@@ -89,7 +90,12 @@ func VerifyAuthAction(rw http.ResponseWriter, req *http.Request, _ httprouter.Pa
 func GenerateCollageAction(rw http.ResponseWriter, req *http.Request, params httprouter.Params) {
 	query := req.URL.Query()
 
-	followers := GetFollowersAction(query["name"][0])
+	width, err := strconv.ParseFloat(query["width"][0], 64)
+	height, err := strconv.ParseFloat(query["height"][0], 64)
+
+	proportions := setProportions(width, height)
+
+	followers := GetFollowersAction(query["name"][0], proportions)
 
 	result, err := json.Marshal(followers)
 

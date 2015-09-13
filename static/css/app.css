@@ -1,7 +1,11 @@
 #collage-wrapper {
-	overflow: hidden;
+	/*overflow: hidden;*/
 }
 
 #collage-wrapper .collage-area {
 	float: left
+}
+
+.form-inline {
+	margin: 30px 0px;
 }

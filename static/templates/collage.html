@@ -1,4 +1,22 @@
 <div class="col-md-12">
+	<div class="col-md-12">
+		<form class="form-inline col-md-12">
+			<div class="form-group col-md-3">
+				<label for="collage-width">Введите ширину коллажа:</label>
+				<input type="text" id="collage-width" ng-model="collage.width" class="form-control" />
+			</div>
+
+			<div class="form-group col-md-3">
+				<label for="user-name">Введите имя пользователя:</label>
+				<input type="text" id="user-name" ng-model="collage.name" class="form-control" />
+			</div>
+
+			<div class="form-group col-md-3">
+				<button class="btn btn-success" ng-click="submit()">Сгенерирывать</button>
+			</div>
+		</form>
+	</div>
+
 	<div id="preloader-area">
 		<h3 style="text-align: center">Подождите, идет загрузка</h3>
 		<div class="col-md-6 col-md-offset-3" id="preloader">
@@ -7,11 +25,17 @@
 		</div>
 	</div>
 
-	<div class="col-md-12" style="width: {{ params.width }}px; height: {{ params.height }}px" id="collage-wrapper">
-		<div class='collage-area' ng-repeat="friend in friends">
-			<a href="http://twitter.com/{{friend.screen_name}}">
-				<img ng-src="{{ friend.profile_image_url }}" alt="{{friend.name}}" />
-			</a>
+	<div class="" style="width: {{ params.width }}px; height: {{ params.height }}px" id="collage-wrapper">
+		<div ng-repeat="line in lines" class=''>
+			<div class='collage-area' ng-repeat="friend in line.followers">
+			
+				<a href="http://twitter.com/{{friend.screen_name}}">
+					<img ng-src="{{ friend.profile_image_url }}" alt="{{ friend.name }}" style="width: {{ friend.width }}px; height: {{ friend.height }}px"/>
+				</a>
+			</div>
+
+			<div class="clearfix">
+			</div>
 		</div>
 	</div>
 </div>
