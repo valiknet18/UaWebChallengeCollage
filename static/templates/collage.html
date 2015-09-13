@@ -25,7 +25,7 @@
 		</div>
 	</div>
 
-	<div class="" style="width: {{ params.width }}px; height: {{ params.height }}px" id="collage-wrapper">
+	<!-- <div class="" style="width: {{ params.width }}px; height: {{ params.height }}px" id="collage-wrapper">
 		<div ng-repeat="line in lines" class=''>
 			<div class='collage-area' ng-repeat="friend in line.followers">
 			
@@ -36,6 +36,15 @@
 
 			<div class="clearfix">
 			</div>
+		</div>
+	</div> -->
+
+	<div class="" style="width: {{ params.width }}px; height: {{ params.height }}px" id="collage-wrapper">
+		<div class='collage-area' ng-repeat="friend in lines.users">
+			
+			<a href="http://twitter.com/{{friend.screen_name}}">
+				<img ng-src="{{ friend.profile_image_url }}" alt="{{ friend.name }}" style="width: {{ friend.width }}px; height: {{ friend.height }}px"/>
+			</a>
 		</div>
 	</div>
 </div>

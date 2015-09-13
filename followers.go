@@ -3,8 +3,17 @@ package main
 import (
 	"encoding/json"
 	// "fmt"
+	"github.com/nfnt/resize"
+	"image"
+	"image/color"
+	"image/draw"
+	_ "image/gif"
+	"image/jpeg"
+	_ "image/png"
 	"io/ioutil"
 	"log"
+	"net/http"
+	"os"
 	"sort"
 )
 
@@ -64,6 +73,10 @@ func GetFollowersAction(name string, proportions Proportions) *followersLineType
 
 		reorderedFollowers := ReorderHash(proportions, followersNotPtr)
 
+		reorderedFollowersNotPtr := *reorderedFollowers
+
+		GenerateCollage(reorderedFollowersNotPtr)
+
 		return reorderedFollowers
 	} else {
 		if client != nil {
@@ -103,6 +116,10 @@ func GetFollowersAction(name string, proportions Proportions) *followersLineType
 			followersNotPtr := *followers
 
 			reorderedFollowers := ReorderHash(proportions, followersNotPtr)
+
+			reorderedFollowersNotPtr := *reorderedFollowers
+
+			GenerateCollage(reorderedFollowersNotPtr)
 
 			return reorderedFollowers
 		} else {
@@ -165,4 +182,86 @@ func FindAndInsertInSlice(follower *Follower, defaultProporsions Proportions, fo
 	}
 
 	return followers
+}
+
+func GenerateCollage(followers followersLineType) {
+	proportions := GetCanvasParameters(followers)
+
+	m := image.NewRGBA(image.Rect(0, 0, int(proportions.Width), int(proportions.Height)))
+	white := color.RGBA{255, 255, 255, 255}
+	draw.Draw(m, m.Bounds(), &image.Uniform{white}, image.ZP, draw.Src)
+
+	heightIndent, widthIndent := 0.0, 0.0
+
+	for _, line := range followers {
+		maxHeight := 0.0
+		lineHeight := 0.0
+
+		for _, follower := range line.Followers {
+
+			response, err := http.Get(follower.ProfileImageUrl)
+
+			if err != nil {
+				log.Fatal("Image not loaded")
+			}
+
+			defer response.Body.Close()
+
+			img, _, err := image.Decode(response.Body)
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			log.Println("Image decode")
+
+			newImage := resize.Resize(uint(follower.Width), uint(follower.Height), img, resize.Lanczos3)
+
+			widthIndent += follower.Width
+
+			if ((widthIndent + follower.Width) <= proportions.Width) && (follower.Height <= line.Height) {
+
+				// draw.Draw(m, m.Bounds(), ne, image.Point{0, 0}, draw.Src)
+
+				draw.Draw(m, m.Bounds(), newImage, image.Point{X: int(widthIndent), Y: int(lineHeight + heightIndent)}, draw.Src)
+
+				if maxHeight < (lineHeight + follower.Height) {
+					maxHeight = lineHeight + follower.Height
+				}
+
+			} else if ((widthIndent + follower.Width) > proportions.Width) && ((maxHeight + follower.Height) <= line.Height) {
+
+				lineHeight = maxHeight
+				maxHeight += follower.Height
+				widthIndent = line.StartWidth
+
+				draw.Draw(m, m.Bounds(), newImage, image.Point{X: int(widthIndent), Y: int(lineHeight + heightIndent)}, draw.Src)
+
+			}
+		}
+
+		widthIndent = 0.0
+		heightIndent = line.Height
+	}
+
+	out, err := os.Create("static/images/result.jpg")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer out.Close()
+
+	// write new image to file
+	jpeg.Encode(out, m, nil)
+}
+
+func GetCanvasParameters(followers followersLineType) *Proportions {
+	resultWidth, resultHeight := 0.0, 0.0
+
+	for _, value := range followers {
+		resultWidth += value.Width
+		resultHeight += value.Height
+	}
+
+	return &Proportions{Width: resultWidth, Height: resultHeight}
 }
