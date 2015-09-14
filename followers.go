@@ -184,18 +184,25 @@ func FindAndInsertInSlice(follower *Follower, defaultProporsions Proportions, fo
 	return followers
 }
 
+type History struct {
+	Height float64
+	Width  float64
+}
+
 func GenerateCollage(followers followersLineType) {
 	proportions := GetCanvasParameters(followers)
 
 	m := image.NewRGBA(image.Rect(0, 0, int(proportions.Width), int(proportions.Height)))
-	white := color.RGBA{255, 255, 255, 255}
-	draw.Draw(m, m.Bounds(), &image.Uniform{white}, image.ZP, draw.Src)
+	white := color.RGBA{255, 255, 255, 0}
+	draw.Draw(m, m.Bounds(), &image.Uniform{white}, image.Point{0, 0}, draw.Src)
 
 	heightIndent, widthIndent := 0.0, 0.0
 
 	for _, line := range followers {
 		maxHeight := 0.0
 		lineHeight := 0.0
+
+		smallHistory := []*History{}
 
 		for _, follower := range line.Followers {
 
@@ -213,17 +220,17 @@ func GenerateCollage(followers followersLineType) {
 				log.Fatal(err)
 			}
 
-			log.Println("Image decode")
-
 			newImage := resize.Resize(uint(follower.Width), uint(follower.Height), img, resize.Lanczos3)
+
+			draw.Draw(m, m.Bounds(), newImage, image.Point{int(widthIndent) * -1, int(lineHeight+heightIndent) * -1}, draw.Src)
 
 			widthIndent += follower.Width
 
+			history := &History{Height: lineHeight + follower.Height, Width: widthIndent}
+
+			smallHistory = append(smallHistory, history)
+
 			if ((widthIndent + follower.Width) <= proportions.Width) && (follower.Height <= line.Height) {
-
-				// draw.Draw(m, m.Bounds(), ne, image.Point{0, 0}, draw.Src)
-
-				draw.Draw(m, m.Bounds(), newImage, image.Point{X: int(widthIndent), Y: int(lineHeight + heightIndent)}, draw.Src)
 
 				if maxHeight < (lineHeight + follower.Height) {
 					maxHeight = lineHeight + follower.Height
@@ -235,8 +242,20 @@ func GenerateCollage(followers followersLineType) {
 				maxHeight += follower.Height
 				widthIndent = line.StartWidth
 
-				draw.Draw(m, m.Bounds(), newImage, image.Point{X: int(widthIndent), Y: int(lineHeight + heightIndent)}, draw.Src)
+				prevHeight := 0.0
 
+				for i := (len(smallHistory) - 1); i >= 0; i-- {
+					if smallHistory[i].Height <= follower.Height {
+						prevHeight = smallHistory[i].Height
+
+						smallHistory = smallHistory[:len(smallHistory)-1]
+					} else {
+						widthIndent = smallHistory[i].Width
+						lineHeight = prevHeight
+					}
+				}
+
+				log.Println("In 2 if")
 			}
 		}
 
@@ -253,6 +272,8 @@ func GenerateCollage(followers followersLineType) {
 
 	// write new image to file
 	jpeg.Encode(out, m, nil)
+
+	log.Println("Image successful created")
 }
 
 func GetCanvasParameters(followers followersLineType) *Proportions {
