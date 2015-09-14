@@ -23,6 +23,11 @@ type Followers struct {
 	Followers []*Follower `json:"users"`
 }
 
+type History struct {
+	Height float64
+	Width  float64
+}
+
 type ByStatusesCount []*Follower
 
 func (a ByStatusesCount) Len() int           { return len(a) }
@@ -75,7 +80,7 @@ func GetFollowersAction(name string, proportions Proportions) *followersLineType
 
 		reorderedFollowersNotPtr := *reorderedFollowers
 
-		GenerateCollage(reorderedFollowersNotPtr)
+		GenerateCollage(proportions, reorderedFollowersNotPtr)
 
 		return reorderedFollowers
 	} else {
@@ -119,7 +124,7 @@ func GetFollowersAction(name string, proportions Proportions) *followersLineType
 
 			reorderedFollowersNotPtr := *reorderedFollowers
 
-			GenerateCollage(reorderedFollowersNotPtr)
+			GenerateCollage(proportions, reorderedFollowersNotPtr)
 
 			return reorderedFollowers
 		} else {
@@ -184,12 +189,8 @@ func FindAndInsertInSlice(follower *Follower, defaultProporsions Proportions, fo
 	return followers
 }
 
-type History struct {
-	Height float64
-	Width  float64
-}
 
-func GenerateCollage(followers followersLineType) {
+func GenerateCollage(defaultProportions Proportions, followers followersLineType) {
 	proportions := GetCanvasParameters(followers)
 
 	m := image.NewRGBA(image.Rect(0, 0, int(proportions.Width), int(proportions.Height)))
@@ -208,6 +209,10 @@ func GenerateCollage(followers followersLineType) {
 
 			response, err := http.Get(follower.ProfileImageUrl)
 
+			if follower.Height != line.Height {
+				maxHeight = follower.Height
+			}
+
 			if err != nil {
 				log.Fatal("Image not loaded")
 			}
@@ -220,6 +225,9 @@ func GenerateCollage(followers followersLineType) {
 				log.Fatal(err)
 			}
 
+			log.Println("Height ", (lineHeight + follower.Height))
+			log.Println("Prop ", line.Height)	
+
 			newImage := resize.Resize(uint(follower.Width), uint(follower.Height), img, resize.Lanczos3)
 
 			draw.Draw(m, m.Bounds(), newImage, image.Point{int(widthIndent) * -1, int(lineHeight+heightIndent) * -1}, draw.Src)
@@ -230,13 +238,13 @@ func GenerateCollage(followers followersLineType) {
 
 			smallHistory = append(smallHistory, history)
 
-			if ((widthIndent + follower.Width) <= proportions.Width) && (follower.Height <= line.Height) {
+			if ((widthIndent + follower.Width) <= defaultProportions.Width) && ((lineHeight + follower.Height) <= line.Height) {
 
 				if maxHeight < (lineHeight + follower.Height) {
 					maxHeight = lineHeight + follower.Height
 				}
 
-			} else if ((widthIndent + follower.Width) > proportions.Width) && ((maxHeight + follower.Height) <= line.Height) {
+			} else if ((widthIndent + follower.Width) > defaultProportions.Width) && ((maxHeight + follower.Height) <= line.Height) {
 
 				lineHeight = maxHeight
 				maxHeight += follower.Height
@@ -252,6 +260,8 @@ func GenerateCollage(followers followersLineType) {
 					} else {
 						widthIndent = smallHistory[i].Width
 						lineHeight = prevHeight
+					
+						break
 					}
 				}
 
@@ -260,7 +270,7 @@ func GenerateCollage(followers followersLineType) {
 		}
 
 		widthIndent = 0.0
-		heightIndent = line.Height
+		heightIndent += line.Height
 	}
 
 	out, err := os.Create("static/images/result.jpg")
